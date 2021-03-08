@@ -4,27 +4,27 @@ import { colors, defaults } from '../Styling'
 
 interface IDropdownProps {
   title?: string,
-  options: Item[],
-  onSelect: (value: string) => void,
+  options: string[],
+  onSelect: (value: number) => void,
   style?: {},
 }
-interface Item { id: string, title: string }
  
 const Dropdown = (props: IDropdownProps) => {
   const [active, setActive] = useState(false)
-  const [selection, setSelection] = useState(props.options[0])
+  const [selection, setSelection] = useState(0)
 
   const fadeIn = (index: number) => ({
     transition: `opacity ${(active ? (index + 1) : props.options.length - index) * transition_time / props.options.length}s`
-     + `, background-color 0.2s`,
+     + `, background-color 0.2s`
+     + `, visibility ${transition_time}s`,
     opacity: active ? 1 : 0,
     cursor: active ? 'pointer' : 'default', }
   )
 
-  const onClickItem = (item: Item) => {
+  const onClickItem = (index: number) => {
     if (active) {
-      setSelection(item)
-      props.onSelect(item.id)
+      setSelection(index)
+      props.onSelect(index)
       setActive(false)
     }
   }
@@ -32,13 +32,13 @@ const Dropdown = (props: IDropdownProps) => {
   return (
     <div className={css.dropdown_container} style={props.style}>
       <div style={{ display: 'flex' }} onClick={() => setActive(!active)}>
-        <div className={css.dropdown_title}>{props.title || selection.title}</div>
+        <div className={css.dropdown_title}>{props.title || props.options[selection]}</div>
         <div className={css.dropdown_arrow + " fa fa-chevron-down"} />
       </div>
-      <div className={css.dropdown_item_container}>
-        {props.options.map((x, i) =>
-          <div className={css.dropdown_item} style={fadeIn(i)} onClick={() => onClickItem(x)}>
-            {x.title}
+      <div className={css.dropdown_item_container} style={{visibility: active ? 'visible' : 'hidden'}}>
+        {props.options.map((title, index) =>
+          <div className={css.dropdown_item} style={fadeIn(index)} onClick={() => onClickItem(index)} key={index}>
+            {title}
           </div>)}
       </div>
     </div>
@@ -56,6 +56,7 @@ const css = stylesheet({
     position: 'relative',
     width: 'fit-content',
     borderRadius: 3,
+    zIndex: 2,
   },
   dropdown_title: {
     color: colors.dark,
@@ -69,15 +70,17 @@ const css = stylesheet({
     fontSize: defaults.font_size_small + 'px !important',
   },
   dropdown_item_container:  {
+    boxShadow: defaults.shadow,
     position: 'absolute',
     left: 0,
   },
   dropdown_item: {
     color: colors.light,
-    backgroundColor: colors.dark + 'DD',
+    backgroundColor: colors.dark + defaults.transparency,
     paddingLeft: defaults.margin,
     paddingRight: defaults.margin,
-    paddingTop: defaults.margin / 2,
+    paddingTop: defaults.margin / 4,
+    paddingBottom: defaults.margin,
     width: '100%',
     overflow: 'hidden',
     opacity: 0,

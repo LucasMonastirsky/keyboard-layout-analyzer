@@ -1,4 +1,10 @@
+type Layout = {
+  name: string,
+  data: string
+}
+
 type Keyboard = {
+  name: string,
   binds: {
     /** Indexed by char. Each char contains every combination of
      * binds that outputs that char.
@@ -21,4 +27,4 @@ type KeyOptions = {
   [key: string]: string
 }
 
-export type { Keyboard, Row, Key, KeyOptions }
+export type { Layout, Keyboard, Row, Key, KeyOptions }

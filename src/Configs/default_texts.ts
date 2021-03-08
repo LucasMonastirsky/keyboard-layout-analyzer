@@ -1,4 +1,4 @@
-export default {
+const default_texts = {
   twitter:
 `Mum's delighted the sun is out, the birds are singing and she's got the washing on the line!! Sun with faceSeedling Face with rolling eyes It's the little things that make Mum happy Rolling on the floor laughingRolling on the floor laughing #dogsoftwitter #happy #mondaythoughts
 
@@ -99,3 +99,5 @@ Such was, on the night of the letter, the extent of my knowledge about Vida Wint
 Now, if the letter was to be believed, Vida Winter wanted to tell the truth about herself. This was curious enough in itself, but curiouser still was my next thought: Why should she want to tell it to me?`,
 
 }
+
+export default default_texts

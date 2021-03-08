@@ -1,8 +1,10 @@
 import { Keyboard, Row, Key } from '../Models/Keyboard'
 import validateChar, { modifiers } from './validate_char'
+import calculateBinds from './calculate_binds'
 
-const readLayout = (layout: string): Keyboard => {
+const readLayout = (layout: string, name?: string): Keyboard => {
   const keyboard: Keyboard = {
+    name: name || 'Untitled Keyboard',
     binds: {},
     rows: [],
     modifiers: {
@@ -51,30 +53,7 @@ const readLayout = (layout: string): Keyboard => {
   })
 
   // calculate binds for each possible character
-  const modifier_order = ['SHIFT', 'CTRL', 'ALT', 'FN', 'FN2']
-  keyboard.rows.forEach(row => {
-    row.keys.forEach(key => {
-      if(!modifiers.includes(key.chars[0])){
-        push([key.id], keyboard.binds, key.chars[0])
-        if (key.chars.length > 1) {
-          for(let i = 1; i < key.chars.length; ++i) {
-            if (key.chars[i] !== "") {
-              const modifier = keyboard.modifiers[modifier_order[i-1]][0]
-              push([key.id, modifier], keyboard.binds, key.chars[i])
-            }
-          }
-        }
-      }
-    })
-  })
-
-  return keyboard
-}
-
-const push = (value: any, dictionary: { [index: string]: any[] }, key: string): void => {
-  if (dictionary[key] === undefined)
-    dictionary[key] = [value]
-  else dictionary[key].push(value)
+  return calculateBinds(keyboard)
 }
 
 export default readLayout

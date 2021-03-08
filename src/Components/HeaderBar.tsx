@@ -1,29 +1,17 @@
-import { Component } from 'react'
-import layouts from '../Configs/default_layouts'
-import { cssRaw, style, stylesheet } from 'typestyle'
+import { stylesheet } from 'typestyle'
 import { colors, defaults } from '../Styling'
 import icon_github from '../Images/github.png'
 
-export default class HeaderBar extends Component<{}, {selectedLayout: string}> {
-  constructor(props: any) {
-    super(props)
-    this.state = { selectedLayout: layouts.qwerty_sixty_percent }
-  }
-
-  handleLayoutChange = (event: {target: {value: string }}): void => {
-    this.setState({selectedLayout: event.target.value})
-  }
-
-  render(): JSX.Element {
-    return (
-    <div className={css.header_bar}>
-      <a className={css.github_container} href="https://github.com/LucasMonastirsky/keyboard-layout-analyzer">
-        <img src={icon_github} className={css.icon} />
-        <div className={css.text}>Source Code</div>
-      </a>
-    </div>
-    )
-  }
+const HeaderBar = () => {
+  return (
+  <div className={css.header_bar}>
+    <div className={css.title}>Keyboard Layout Analyzer</div>
+    <a className={css.github_container} href="https://github.com/LucasMonastirsky/keyboard-layout-analyzer">
+      <img src={icon_github} className={css.icon} alt="GitHub Link" />
+      <div className={css.text}>Source Code</div>
+    </a>
+  </div>
+  )
 }
 
 const css = stylesheet({
@@ -35,6 +23,12 @@ const css = stylesheet({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: defaults.font_size_normal,
+  },
+  title: {
+    fontSize: defaults.font_size_big,
+    color: colors.light,
+    marginLeft: defaults.margin,
+    cursor: 'default',
   },
   github_container: {
     display: 'flex',
@@ -61,3 +55,5 @@ const css = stylesheet({
     color: colors.light,
   },
 })
+
+export default HeaderBar

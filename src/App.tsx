@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
-import { HeaderBar, KeyboardContainer, SimulationInputMenu } from './Components'
-import { style, stylesheet } from 'typestyle'
+import { HeaderBar, KeyboardContainer } from './Components'
+import { Keyboard } from './Models/Keyboard'
+import { stylesheet } from 'typestyle'
 import { default_layouts } from './Configs'
+import MultiMenu from './Components/MultiMenu'
+import MenuSimulation from './Components/MenuSimulation'
 
 function App() {
   const [simulation_text, setSimulationText] = useState("")
-  const [keyboards, setKeyboards] = useState([{ layout: default_layouts.qwerty_sixty_percent }])
+  const [keyboards, setKeyboards] = useState([default_layouts[0]])
 
   const onSubmitText = (text: string) => {
     setSimulationText(text)
@@ -13,21 +16,20 @@ function App() {
 
   const onAddKeyboard = (index: number) => {
     const new_keyboards = keyboards
-    new_keyboards.splice(index + 1, 0, { layout: default_layouts.qwerty_sixty_percent })
+    new_keyboards.splice(index + 1, 0, default_layouts[0])
     setKeyboards([...new_keyboards])
   }
 
   const onRemoveKeyboard = (index: number) => {
-    if (keyboards.length < 2)
-      return
     const new_keyboards = keyboards
     new_keyboards.splice(index, 1)
     setKeyboards([...new_keyboards])
+    console.log(new_keyboards)
   }
 
-  const onChangeLayout = (index: number, layout: string) => {
+  const onChangeKeyboard = (index: number, keyboard: Keyboard) => {
     const new_keyboards = keyboards
-    new_keyboards.splice(index, 1, { layout })
+    new_keyboards.splice(index, 1, keyboard)
     setKeyboards([...new_keyboards])
   }
 
@@ -37,12 +39,16 @@ function App() {
       <div className={css.content}>
         {keyboards.map((keyboard, index) => <KeyboardContainer
           text={simulation_text}
-          layout={keyboard.layout}
-          onChangeLayout={(layout: string) => onChangeLayout(index, layout)}
+          keyboard={keyboard}
+          onChangeKeyboard={keyboard => onChangeKeyboard(index, keyboard)}
           onRemove={() => onRemoveKeyboard(index)}
-          onAdd={() => onAddKeyboard(index)} />)}
+          onAdd={() => onAddKeyboard(index)}
+          remove_disabled={keyboards.length === 1}
+          key={index} />)}
       </div>
-      <SimulationInputMenu onSubmitText={onSubmitText} />
+      <MultiMenu menus={[
+        {title: 'SIMULATION', content: <MenuSimulation onSubmitText={onSubmitText} />},
+      ]} />
     </div>
   )
 }
@@ -61,12 +67,3 @@ const css = stylesheet({
 })
 
 export default App
-
-const style_app = 'app ' + style({
-  
-})
-
-const style_keyboard_container = 'keyboard_container ' + style({
-  display: 'inline-block',
-  alignSelf: 'center',
-})

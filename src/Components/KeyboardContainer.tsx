@@ -1,36 +1,56 @@
-import simulate, { ISimulation } from '../Utils/simulate'
+import simulate from '../Utils/simulate'
 import VisualKeyboard from './VisualKeyboard'
-import { useState } from 'react'
-import readLayout from '../Utils/read_layout'
+import { useEffect, useState } from 'react'
 import { default_layouts } from '../Configs'
 import { Dropdown } from '../Components'
 import { defaults } from '../Styling'
+import { Key, Keyboard } from '../Models/Keyboard'
 import { stylesheet } from 'typestyle'
+import calculateBinds from '../Utils/calculate_binds'
 
 interface IKeyboardContainerProps {
   text: string,
-  layout: string,
+  keyboard: Keyboard,
   onRemove: () => void,
   onAdd: () => void
-  onChangeLayout: (layout: string) => void,
+  onChangeKeyboard: (keyboard: Keyboard) => void,
+  remove_disabled?: boolean,
 }
 const KeyboardContainer = (props: IKeyboardContainerProps) => {
-  const layouts = Object.keys(default_layouts).map(key => ({ id: key, title: key }))
-  const layout = readLayout(props.layout)
+  const [keyboard, _setKeyboard] = useState(props.keyboard)
+  const [simulation, setSimulation] = useState(simulate(keyboard, props.text))
+  useEffect(()=>{_setKeyboard(props.keyboard)}, [props.keyboard])
+  useEffect(()=>{setSimulation(simulate(keyboard, props.text))}, [props.text])
+
+  const setKeyboard = (new_keyboard: Keyboard) => {
+    _setKeyboard(new_keyboard)
+    setSimulation(simulate(new_keyboard, props.text))
+    props.onChangeKeyboard(new_keyboard)
+  }
+
+  const updateKey = (row_index: number, key_index: number, key: Key) => {
+    keyboard.rows[row_index].keys[key_index] = key
+    setKeyboard(calculateBinds(keyboard))
+    setSimulation(simulate(keyboard, props.text))
+  }
 
   return (
     <div className={css.keyboard_container}>
       <div className={css.keyboard_header}>
         <div style={{flex: 1}} />
         <div style={{flex: 1, display: 'flex', justifyContent: 'center' }}>
-          <Dropdown options={layouts} onSelect={selection => props.onChangeLayout(default_layouts[selection])}/>
+          <Dropdown
+            title={keyboard.name}
+            options={default_layouts.map(layout => layout.name)}
+            onSelect={selection => setKeyboard(default_layouts[selection])}
+          />
         </div>
         <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <div onClick={props.onRemove} className={css.keyboard_icon + " fa fa-minus"} />
+          <div onClick={props.onRemove} className={css.keyboard_icon + " fa fa-minus"} style={{visibility: props.remove_disabled ? 'hidden' : 'visible'}}/>
           <div onClick={props.onAdd} className={css.keyboard_icon + " fa fa-plus"} />
         </div>
       </div>
-      <VisualKeyboard layout={layout} simulation={simulate(layout, props.text)} />
+      <VisualKeyboard keyboard={keyboard} simulation={simulation} updateKey={updateKey} />
     </div>
   )
 }
