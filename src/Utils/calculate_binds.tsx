@@ -1,5 +1,4 @@
 import { Keyboard } from "../Models/Keyboard"
-
 import { modifiers } from './validate_char'
 
 const calculateBinds = (keyboard: Keyboard) => {

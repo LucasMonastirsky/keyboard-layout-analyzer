@@ -1,5 +1,4 @@
 import simulate from '../Utils/simulate'
-import VisualKeyboard from './VisualKeyboard'
 import { useEffect, useState } from 'react'
 import { default_layouts } from '../Configs'
 import { Dropdown } from '../Components'
@@ -7,6 +6,7 @@ import { defaults } from '../Styling'
 import { Key, Keyboard } from '../Models/Keyboard'
 import { stylesheet } from 'typestyle'
 import calculateBinds from '../Utils/calculate_binds'
+import VisualKey from './VisualKey'
 
 interface IKeyboardContainerProps {
   text: string,
@@ -28,15 +28,24 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
     props.onChangeKeyboard(new_keyboard)
   }
 
-  const updateKey = (row_index: number, key_index: number, key: Key) => {
-    keyboard.rows[row_index].keys[key_index] = key
+  const updateKey = (row_index: number, key_index: number, key: Key | null, add_key?: boolean) => {
+    if (key === null)
+      keyboard.rows[row_index].keys.splice(key_index, 1)
+    else
+      keyboard.rows[row_index].keys[key_index] = key
+    if (add_key)
+      keyboard.rows[row_index].keys.splice(key_index, 0, {
+        id: lastOf(lastOf(keyboard.rows).keys).id + 1,
+        chars: Array(5).fill(''),
+        options: {}})
+
     setKeyboard(calculateBinds(keyboard))
     setSimulation(simulate(keyboard, props.text))
   }
 
   return (
     <div className={css.keyboard_container}>
-      <div className={css.keyboard_header}>
+      <div className={css.header}>
         <div style={{flex: 1}} />
         <div style={{flex: 1, display: 'flex', justifyContent: 'center' }}>
           <Dropdown
@@ -46,14 +55,29 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
           />
         </div>
         <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <div onClick={props.onRemove} className={css.keyboard_icon + " fa fa-minus"} style={{visibility: props.remove_disabled ? 'hidden' : 'visible'}}/>
-          <div onClick={props.onAdd} className={css.keyboard_icon + " fa fa-plus"} />
+          <div onClick={props.onRemove} className={css.icon + " fa fa-minus"} style={{visibility: props.remove_disabled ? 'hidden' : 'visible'}}/>
+          <div onClick={props.onAdd} className={css.icon + " fa fa-plus"} />
         </div>
       </div>
-      <VisualKeyboard keyboard={keyboard} simulation={simulation} updateKey={updateKey} />
+      <div className={css.keyboard}>
+        {keyboard.rows.map((row, row_index) =>
+          <div className={css.row} key={row_index}>
+            {row.keys.map((key, key_index) => 
+              <VisualKey
+                key={`${key_index}`}
+                key_obj={key}
+                heat={(simulation.heatmap[key.id] ?? 0) / simulation.max_heat}
+                updateKey={(key: Key | null, add_key?: boolean) => {updateKey(row_index, key_index, key, add_key)}}
+              />
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+
+const lastOf = (arr: any[]) => arr[arr.length-1]
 
 const css = stylesheet({
   keyboard_container: {
@@ -62,20 +86,22 @@ const css = stylesheet({
     marginRight: 'auto',
     width: 'fit-content',
   },
-  keyboard_header: {
+  header: {
     display: 'flex',
     justifyContent: 'center',
     marginBottom: defaults.margin
   },
-  keyboard_icon: {
+  icon: {
     marginRight: defaults.margin * 2,
     fontSize: defaults.font_size_big + 'px !important',
-    $nest: {
-      '&:hover': {
-        cursor: 'pointer',
-      }
-    }
-  }
+    cursor: 'pointer',
+  },
+  keyboard: {
+    display: 'grid',
+  },
+  row: {
+  
+  },
 })
 
 export default KeyboardContainer

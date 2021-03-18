@@ -1,42 +1,11 @@
 import React, { useState } from 'react'
-import { Keyboard, Key } from '../Models/Keyboard'
-import { ISimulation } from '../Utils/simulate'
+import { Key } from '../Models/Keyboard'
 import { heatToColor } from '../Utils/color_manipulation'
 import { stylesheet } from 'typestyle'
 import { colors, defaults } from '../Styling'
 import KeyEditMenu from './KeyEditMenu'
 
-interface VisualKeyboardProps {
-  keyboard: Keyboard,
-  simulation: ISimulation,
-  updateKey: (
-    row_index: number,
-    key_index: number,
-    key: Key,
-  )=>void,
-}
-const VisualKeyboard = (props: VisualKeyboardProps) => {
-  return (
-    <div className={css.keyboard}>
-      {props.keyboard.rows.map((row, row_index) =>
-        <div className={css.row} key={row_index}>
-          {row.keys.map((key, key_index) => {
-            let heat = 0;
-            if (props.simulation.heatmap[key.id] !== undefined)
-              heat = props.simulation.heatmap[key.id] / props.simulation.max_heat
-            return <VisualKey
-              key_obj={key}
-              heat={heat}
-              key={`${key_index}`}
-              updateKey={key => {props.updateKey(row_index, key_index, key)}} />
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-const VisualKey = (props: { key_obj: Key, key: string, heat: number, updateKey: (key: Key)=>void }) => {
+const VisualKey = (props: { key_obj: Key, key: string, heat: number, updateKey: (key: Key | null, add_key?: boolean)=>void }) => {
   const [editting, setEditting] = useState(false)
 
   return (
@@ -62,7 +31,7 @@ const VisualKey = (props: { key_obj: Key, key: string, heat: number, updateKey: 
       </div>
       {editting && <KeyEditMenu
         key_obj={props.key_obj}
-        updateKey={key => props.updateKey(key)}
+        updateKey={props.updateKey}
         onClickOutside={() => setEditting(false)} />}
     </div>
   )
@@ -76,12 +45,6 @@ const font_big = 30
 const font_small = 20
 
 const css = stylesheet({
-  keyboard: {
-    display: 'grid',
-  },
-  row: {
-  
-  },
   key_slot: {
     float: 'left',
     display: 'flex',
@@ -134,4 +97,4 @@ const css = stylesheet({
   }
 })
 
-export default VisualKeyboard
+export default VisualKey

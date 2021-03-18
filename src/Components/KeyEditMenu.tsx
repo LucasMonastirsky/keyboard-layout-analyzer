@@ -3,7 +3,7 @@ import { stylesheet } from 'typestyle'
 import { Key } from '../Models/Keyboard'
 import { colors, defaults } from '../Styling'
 
-const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key) => void, onClickOutside: ()=>void}) => {
+const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?: boolean) => void, onClickOutside: ()=>void}) => {
   const [key, setKey] = useState(props.key_obj)
 
   const menu_ref = useRef<HTMLDivElement>(null)
@@ -19,9 +19,12 @@ const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key) => void, onClic
     props.updateKey(key)
   }
 
-  const updateKey = (new_key: Key) => {
-    setKey(new_key)
-    props.updateKey(new_key)
+  const updateKey = (new_key: Key | null, add_key?: boolean) => {
+    if (new_key !== null)
+      setKey(new_key)
+    props.updateKey(new_key, add_key)
+    if(add_key)
+      props.onClickOutside()
   }
 
   const onClickAnywhere = (e: any) => {
@@ -44,9 +47,20 @@ const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key) => void, onClic
       )}
       <Input
         title="WIDTH"
-        content={props.key_obj.options.w || `${1}`}
+        content={props.key_obj.options.w || '1'}
         onChange={width => {key.options.w = width; updateKey(key)}}
-        type="numberic" />
+        type="numeric"
+      />
+      <Input
+        title="GAP"
+        content={props.key_obj.options.x || '0'}
+        onChange={gap => {key.options.x = gap; updateKey(key)}}
+        type="numeric"
+      />
+      <div className={css.icon_container}>
+        <i onClick={()=>updateKey(null)} className={css.icon + ' fa fa-minus'}></i>
+        <i onClick={()=>updateKey(key, true)} className={css.icon + ' fa fa-plus'}></i>
+      </div>
     </div>
   )
 }
@@ -81,7 +95,7 @@ const Input = (props: {title: string, content: string, onChange: (char: string)=
       <div className={css.label}>{props.title}</div>
       <div onClick={()=>setActive(!active)} className={css.input + (active ? ' active' : '')}>
         {props.type === 'key' && <div>{props.content}</div>}
-        {props.type === 'numberic' && <input className={css.text_input}
+        {props.type === 'numeric' && <input className={css.text_input}
           type="number"
           step="0.25"
           onChange={x => props.onChange(x.target.value)}
@@ -109,8 +123,8 @@ const css = stylesheet({
     position: 'absolute',
     top: defaults.key_width,
     marginTop: defaults.margin / 2,
+    padding: defaults.margin / 3,
     width: 'max-content',
-    height: 200,
     zIndex: 1,
   },
   line: {
@@ -150,6 +164,27 @@ const css = stylesheet({
     border: 0,
     outline: 0,
     textAlign: 'end',
+  },
+  icon_container: {
+    backgroundColor: colors.dark + defaults.transparency,
+    paddingRight: defaults.margin / 4,
+    paddingLeft: defaults.margin / 4,
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+    boxShadow: defaults.shadow,
+    position: 'absolute',
+    bottom: '100%',
+    right: defaults.margin / 2,
+    $nest: {
+      '& > * + *': {
+        marginLeft: defaults.margin / 2,
+      }
+    },
+  },
+  icon: {
+    fontSize: defaults.font_size_big,
+    padding: defaults.margin / 3,
+    cursor: 'pointer',
   },
 })
 
