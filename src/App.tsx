@@ -10,6 +10,7 @@ function App() {
   const [simulation_text, setSimulationText] = useState("")
   const [keyboards, setKeyboards] = useState([default_layouts[0]])
 
+  //#region Functions
   const onSubmitText = (text: string) => {
     setSimulationText(text)
   }
@@ -32,6 +33,7 @@ function App() {
     new_keyboards.splice(index, 1, keyboard)
     setKeyboards([...new_keyboards])
   }
+  //#endregion
 
   return (
     <div className={css.app}>
@@ -44,7 +46,8 @@ function App() {
           onRemove={() => onRemoveKeyboard(index)}
           onAdd={() => onAddKeyboard(index)}
           remove_disabled={keyboards.length === 1}
-          key={index} />)}
+          key={index}
+        />)}
       </div>
       <MultiMenu menus={[
         {title: 'SIMULATION', content: <MenuSimulation onSubmitText={onSubmitText} />},

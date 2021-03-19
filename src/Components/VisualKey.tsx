@@ -1,39 +1,115 @@
-import React, { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Key } from '../Models/Keyboard'
 import { heatToColor } from '../Utils/color_manipulation'
 import { stylesheet } from 'typestyle'
 import { colors, defaults } from '../Styling'
 import KeyEditMenu from './KeyEditMenu'
+import KeyTooltip from './KeyTooltip'
+import Draggable from 'react-draggable'
+import { KeyData } from '../Models/Simulation'
 
-const VisualKey = (props: { key_obj: Key, key: string, heat: number, updateKey: (key: Key | null, add_key?: boolean)=>void }) => {
+interface IVisualKeyProps {
+  key_obj: Key,
+  key_data: KeyData,
+  updateKey: (key: Key | null, add_key?: boolean) => void,
+  swapWithKey: (x: number, y: number) => void
+}
+
+
+const VisualKey = (props: IVisualKeyProps) => {
   const [editting, setEditting] = useState(false)
+  const [is_dragging, setDragging] = useState(false)
+  const [click_timestamp, setClickTimestamp] = useState(0)
+  const [tooltip_active, setTooltipActive] = useState(false)
+  const [tooltip_pos, setTooltipPos] = useState({x: 0, y: 0})
+  const [hovering, setHovering] = useState(false)
+  const hovering_ref = useRef(hovering)
+  hovering_ref.current = hovering
+
+  const ref = useRef<HTMLDivElement>(null)
+
+  //#region Functions
+  const onMouseDown = () => {
+    setClickTimestamp(editting ? 0 : Date.now())
+    console.log(ref.current?.getBoundingClientRect())
+  }
+
+  const onMouseUp = () => {
+    if (editting || is_dragging || Date.now() - click_timestamp > 300)
+      return
+    else setEditting(true)
+  }
+
+  const drag_events = {
+    onDrag: () => {
+      if (editting || Date.now() - click_timestamp < 50) {
+        setDragging(false)
+      }
+      else {
+        setDragging(true)
+        setClickTimestamp(0)
+      }
+    },
+    onStop: (e: any) => {
+      setDragging(false)
+      props.swapWithKey(e.x, e.y)
+    }
+  }
+
+  const hover_events = {
+    onMouseEnter: (e: any) => {
+      delayTooltip()
+      setHovering(true)
+    },
+    onMouseLeave: (e: any) => {
+      setHovering(false)
+      setTooltipActive(false)
+    },
+    onMouseMove: (e: any) => {
+      setTooltipPos({x: e.pageX + 15, y: e.pageY + 5})
+      setTooltipActive(false)
+      delayTooltip()
+    }
+  }
+
+  const delayTooltip = () => {
+    setTimeout(() => {
+      if (hovering_ref.current)
+        setTooltipActive(true)
+    }, 500)
+  }
+  //#endregion
 
   return (
-    <div className={css.key_slot}
-      style={{
-        width: `${(+props.key_obj.options.w || 1) * defaults.key_width}px`,
-        marginLeft: (+props.key_obj.options.x || 0) * defaults.key_width, }}>
-      <div className={css.key} style={{backgroundColor: heatToColor(props.heat || 0) }} onClick={() => setEditting(!editting)}>
-        <div className={css.key_cell_top}>
-          <div className={css.key_legend_top}>{props.key_obj.chars[4] || ""}</div>
-          <div className={css.key_legend_top_second}>{props.key_obj.chars[5] || ""}</div>
-        </div>
-        <div className={css.key_cell_center}>
-          <div className={css.key_legend_center} style={{fontSize: props.key_obj.chars[0].length > 1 ? font_small : font_big }}>
-            {props.key_obj.chars[0] || ""}
+      <div ref={ref} className={css.key_slot} style={{
+          width: (+props.key_obj.options.w || 1) * defaults.key_width,
+          marginLeft: (+props.key_obj.options.x || 0) * defaults.key_width, }}
+          {...{onMouseUp, onMouseDown}}>
+        <Draggable bounds={is_dragging ? false : {top: 0, right: 0, left: 0, bottom: 0}} position={{x:0, y: 0}} {...drag_events}>
+          <div className={css.key} style={{backgroundColor: heatToColor(props.key_data.heat), zIndex: is_dragging ? 2 : 1 }} {...hover_events}>
+            <div className={css.key_cell_top}>
+              <div className={css.key_legend_top}>{props.key_obj.chars[4] || ""}</div>
+              <div className={css.key_legend_top_second}>{props.key_obj.chars[5] || ""}</div>
+            </div>
+            <div className={css.key_cell_center}>
+              <div className={css.key_legend_center} style={{fontSize: props.key_obj.chars[0].length > 1 ? font_small : font_big }}>
+                {props.key_obj.chars[0] || ""}
+              </div>
+            </div>
+            <div className={css.key_cell_bottom}>
+              <div className={css.key_legend_bottom}>{props.key_obj.chars[1] || ""}</div>
+              <div className={css.key_legend_bottom}>{props.key_obj.chars[2] || ""}</div>
+              <div className={css.key_legend_bottom}>{props.key_obj.chars[3] || ""}</div>
+            </div>
           </div>
-        </div>
-        <div className={css.key_cell_bottom}>
-          <div className={css.key_legend_bottom}>{props.key_obj.chars[1] || ""}</div>
-          <div className={css.key_legend_bottom}>{props.key_obj.chars[2] || ""}</div>
-          <div className={css.key_legend_bottom}>{props.key_obj.chars[3] || ""}</div>
-        </div>
+        </Draggable>
+        {editting && <KeyEditMenu
+          key_obj={props.key_obj}
+          updateKey={props.updateKey}
+          onClickOutside={() => setEditting(false)}
+        />}
+        <KeyTooltip active={tooltip_active} pos={tooltip_pos} data={props.key_data} />
       </div>
-      {editting && <KeyEditMenu
-        key_obj={props.key_obj}
-        updateKey={props.updateKey}
-        onClickOutside={() => setEditting(false)} />}
-    </div>
   )
 }
 
@@ -50,6 +126,7 @@ const css = stylesheet({
     display: 'flex',
     position: 'relative',
     height: defaults.key_width,
+    userSelect: 'none',
   },
   key: {
     backgroundColor: colors.keycap,

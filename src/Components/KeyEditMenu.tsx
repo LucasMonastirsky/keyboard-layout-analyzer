@@ -5,9 +5,9 @@ import { colors, defaults } from '../Styling'
 
 const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?: boolean) => void, onClickOutside: ()=>void}) => {
   const [key, setKey] = useState(props.key_obj)
-
   const menu_ref = useRef<HTMLDivElement>(null)
 
+  //#region Functions
   const changeChar = (index: number, char: string) => {
     const chars = [...key.chars]
     if(chars.length < index) // fill empty chars with ''
@@ -33,12 +33,13 @@ const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?
   }
 
   useEffect(() => {
-    window.addEventListener('click', onClickAnywhere)
+    window.addEventListener('mousedown', onClickAnywhere)
 
     return () => {
-      window.removeEventListener('click', onClickAnywhere)
+      window.removeEventListener('mousedown', onClickAnywhere)
     }
   })
+  //#endregion
 
   return (
     <div className={css.edit_menu} ref={menu_ref}>
@@ -68,6 +69,7 @@ const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?
 const Input = (props: {title: string, content: string, onChange: (char: string)=>void, type: string}) => {
   const [active, setActive] = useState(false)
 
+  //#region Functions
   const onKeyDown = (e: {key: string}) => {
     if (active && props.type === 'key') {
       props.onChange(validate(e.key))
@@ -82,13 +84,14 @@ const Input = (props: {title: string, content: string, onChange: (char: string)=
 
   useEffect(() => {
     window.addEventListener('keydown', onKeyDown)
-    window.addEventListener('click', onClickAnywhere)
+    window.addEventListener('mousedown', onClickAnywhere)
 
     return () => {
       window.removeEventListener('keydown', onKeyDown)
-      window.removeEventListener('click', onClickAnywhere)
+      window.removeEventListener('mousedown', onClickAnywhere)
     }
   })
+  //#endregion
 
   return (
     <div className={css.line}>
@@ -125,7 +128,7 @@ const css = stylesheet({
     marginTop: defaults.margin / 2,
     padding: defaults.margin / 3,
     width: 'max-content',
-    zIndex: 1,
+    zIndex: 2,
   },
   line: {
     display: 'flex',
