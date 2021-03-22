@@ -6,6 +6,7 @@ const HeaderBar = () => {
   return (
   <div className={css.header_bar}>
     <div className={css.title}>Keyboard Layout Analyzer</div>
+    <div className={css.version}>version 0.7</div>
     <a className={css.github_container} href="https://github.com/LucasMonastirsky/keyboard-layout-analyzer">
       <img src={icon_github} className={css.icon} alt="GitHub Link" />
       <div className={css.text}>Source Code</div>
@@ -30,6 +31,14 @@ const css = stylesheet({
     marginLeft: defaults.margin,
     cursor: 'default',
   },
+  version: {
+    fontSize: defaults.font_size_small,
+    color: colors.light,
+    marginLeft: defaults.margin,
+    cursor: 'default',
+    fontWeight: 400,
+    alignSelf: 'flex-end',
+  },
   github_container: {
     display: 'flex',
     alignItems: 'center',
@@ -38,6 +47,7 @@ const css = stylesheet({
     marginBottom: -defaults.margin,
     padding: defaults.margin,
     transition: `background-color ${defaults.transition_time}s`,
+    textDecoration: 'none',
     $nest: {
       '& > * + *': {
         marginLeft: defaults.margin,  

@@ -20,6 +20,7 @@ type Row = { keys: Key[] }
 type Key = {
   id: number
   chars: string[]
+  pos: { x: number, y: number }
   options: KeyOptions
 }
 

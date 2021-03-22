@@ -31,8 +31,8 @@ const default_layouts: Keyboard[] = [
     'Dvorak 40%'
   ),
   readLayout(
-    'MISC x:0.5|=,-,+,*|J|P|Y|F|G,,,,6|C,,,,7|R,,,,8|L,,,,9|\',",`,,0|BKS\n' +
-    'CAPS|A|O|E|U|I|?,!,&,BAR|D,,,,1|H,,,,2|T,,,,3|N,,,,4|S,,,,5|ENTER\n' +
+    'MISC x:0.5|=,-,+,*|J|P|Y|F|G,,,,5|N,,,,6|R,,,,7|L,,,,8|\',",`,,9|BKS\n' +
+    'CAPS|U|O|I|E|A|?,!,&,BAR|D,,,,0|T,,,,1|S,,,,2|C,,,,3|H,,,,4|ENTER\n' +
     'SHIFT x:0.75|Q|K|X|B|COMMA,.,;,:,^ w:1.5|M,,,,@|W,,,,#|V,,,,$|Z,,,,%|MISC\n' +
     'FN x:0.5|CTRL|ALT|OS|{,(,[,<|SPACE,_,TAB,ESC w:2|},),],>|MISC|MISC|MISC|MISC',
     'Custom Programmer Layout'

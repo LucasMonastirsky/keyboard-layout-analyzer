@@ -33,7 +33,7 @@ const css = stylesheet({
     boxShadow: defaults.shadow,
     position: 'fixed',
     pointerEvents: 'none',
-    zIndex: 2,
+    zIndex: 3,
   },
   line: {
     display: 'flex',

@@ -36,6 +36,7 @@ const css = stylesheet({
     width: '100%',
     bottom: 0,
     marginTop: 'auto',
+    zIndex: 2,
   },
   content: {
     backgroundColor: colors.dark,

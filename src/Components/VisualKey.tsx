@@ -11,6 +11,7 @@ import { KeyData } from '../Models/Simulation'
 interface IVisualKeyProps {
   key_obj: Key,
   key_data: KeyData,
+  heat_enabled?: boolean,
   updateKey: (key: Key | null, add_key?: boolean) => void,
   swapWithKey: (x: number, y: number) => void
 }
@@ -23,21 +24,26 @@ const VisualKey = (props: IVisualKeyProps) => {
   const [tooltip_active, setTooltipActive] = useState(false)
   const [tooltip_pos, setTooltipPos] = useState({x: 0, y: 0})
   const [hovering, setHovering] = useState(false)
+  
   const hovering_ref = useRef(hovering)
   hovering_ref.current = hovering
+  const editting_ref = useRef(editting)
+  editting_ref.current = editting
 
   const ref = useRef<HTMLDivElement>(null)
 
   //#region Functions
   const onMouseDown = () => {
     setClickTimestamp(editting ? 0 : Date.now())
-    console.log(ref.current?.getBoundingClientRect())
   }
 
   const onMouseUp = () => {
     if (editting || is_dragging || Date.now() - click_timestamp > 300)
       return
-    else setEditting(true)
+    else {
+      setEditting(true)
+      setTooltipActive(false)
+    }
   }
 
   const drag_events = {
@@ -65,8 +71,8 @@ const VisualKey = (props: IVisualKeyProps) => {
       setHovering(false)
       setTooltipActive(false)
     },
-    onMouseMove: (e: any) => {
-      setTooltipPos({x: e.pageX + 15, y: e.pageY + 5})
+    onMouseMove: (e: any ) => {
+      setTooltipPos({x: e.clientX + 15, y: e.clientY + 5})
       setTooltipActive(false)
       delayTooltip()
     }
@@ -74,11 +80,18 @@ const VisualKey = (props: IVisualKeyProps) => {
 
   const delayTooltip = () => {
     setTimeout(() => {
-      if (hovering_ref.current)
+      if (hovering_ref.current && !editting_ref.current)
         setTooltipActive(true)
     }, 500)
   }
   //#endregion
+
+  const key_style = {
+    backgroundColor: (props.heat_enabled ?? true)
+      ? heatToColor(props.key_data.heat)
+      : colors.keycap,
+    zIndex: is_dragging ? 2 : 0
+  }
 
   return (
       <div ref={ref} className={css.key_slot} style={{
@@ -86,7 +99,7 @@ const VisualKey = (props: IVisualKeyProps) => {
           marginLeft: (+props.key_obj.options.x || 0) * defaults.key_width, }}
           {...{onMouseUp, onMouseDown}}>
         <Draggable bounds={is_dragging ? false : {top: 0, right: 0, left: 0, bottom: 0}} position={{x:0, y: 0}} {...drag_events}>
-          <div className={css.key} style={{backgroundColor: heatToColor(props.key_data.heat), zIndex: is_dragging ? 2 : 1 }} {...hover_events}>
+          <div className={css.key} style={key_style} {...hover_events}>
             <div className={css.key_cell_top}>
               <div className={css.key_legend_top}>{props.key_obj.chars[4] || ""}</div>
               <div className={css.key_legend_top_second}>{props.key_obj.chars[5] || ""}</div>

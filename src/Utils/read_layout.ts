@@ -1,6 +1,7 @@
 import { Keyboard, Row, Key } from '../Models/Keyboard'
 import validateChar, { modifiers } from './validate_char'
 import calculateBinds from './calculate_binds'
+import { defaults } from '../Styling'
 
 const readLayout = (layout: string, name?: string): Keyboard => {
   const keyboard: Keyboard = {
@@ -20,13 +21,19 @@ const readLayout = (layout: string, name?: string): Keyboard => {
   // this could technically be faster by iterating only once per character using a buffer
   // but the performance improvement would not be noticeable, and this is more readable
   
-  let count: number = 0
+  let count = 0
 
   // get rows and keys
-  layout.split('\n').forEach(line => {
-    const result_row: Row = { keys: [] }
-    line.split('|').forEach(key => {
-      const result_key: Key = { id: count, chars: [], options: {} }
+  layout.split('\n').forEach((row, row_index) => {
+    const result_row: Row = { keys: [] }  
+    let previous_x = 0
+    row.split('|').forEach(key => {
+      const result_key: Key = {
+        id: count,
+        chars: [],
+        pos: { x: 0, y: 0 },
+        options: {},
+      }
       const split = key.split(' ') // split into chars and options
 
       // chars
@@ -46,6 +53,13 @@ const readLayout = (layout: string, name?: string): Keyboard => {
           result_key.options[options[0]] = options[1] })
       }
 
+      // calculate x,y
+      const width = defaults.key_width * (+(result_key.options['w'] ?? 1))
+      const gap = +(result_key.options['x'] ?? 0) * defaults.key_width
+      result_key.pos.x = previous_x + width / 2 + gap
+      result_key.pos.y = row_index * defaults.key_width + defaults.key_width / 2
+      previous_x = previous_x + width + gap
+    
       result_row.keys.push(result_key)
       ++count
     })

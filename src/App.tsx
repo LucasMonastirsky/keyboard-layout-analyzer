@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { HeaderBar, KeyboardContainer } from './Components'
 import { Keyboard } from './Models/Keyboard'
 import { stylesheet } from 'typestyle'
@@ -9,6 +9,10 @@ import MenuSimulation from './Components/MenuSimulation'
 function App() {
   const [simulation_text, setSimulationText] = useState("")
   const [keyboards, setKeyboards] = useState([default_layouts[0]])
+
+  useEffect(() => {
+    document.title = "Keyboard Analyzer"
+  })
 
   //#region Functions
   const onSubmitText = (text: string) => {

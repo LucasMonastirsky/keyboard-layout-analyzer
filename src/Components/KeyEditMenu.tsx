@@ -128,7 +128,7 @@ const css = stylesheet({
     marginTop: defaults.margin / 2,
     padding: defaults.margin / 3,
     width: 'max-content',
-    zIndex: 2,
+    zIndex: 3,
   },
   line: {
     display: 'flex',
