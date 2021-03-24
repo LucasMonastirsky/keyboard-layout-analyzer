@@ -1,0 +1,1 @@
+export { default as createHeatmap } from './create_heatmap'

@@ -2,10 +2,11 @@ import { Keyboard, Row, Key } from '../Models/Keyboard'
 import validateChar, { modifiers } from './validate_char'
 import calculateBinds from './calculate_binds'
 import { defaults } from '../Styling'
+import { widthOf } from './calc_utils'
 
 const readLayout = (layout: string, name?: string): Keyboard => {
   const keyboard: Keyboard = {
-    name: name || 'Untitled Keyboard',
+    name: name ?? 'Untitled Keyboard',
     binds: {},
     rows: [],
     modifiers: {
@@ -54,7 +55,7 @@ const readLayout = (layout: string, name?: string): Keyboard => {
       }
 
       // calculate x,y
-      const width = defaults.key_width * (+(result_key.options['w'] ?? 1))
+      const width = widthOf(result_key)
       const gap = +(result_key.options['x'] ?? 0) * defaults.key_width
       result_key.pos.x = previous_x + width / 2 + gap
       result_key.pos.y = row_index * defaults.key_width + defaults.key_width / 2

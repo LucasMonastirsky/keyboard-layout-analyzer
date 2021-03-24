@@ -7,12 +7,8 @@ import { Key, Keyboard } from '../Models/Keyboard'
 import { stylesheet } from 'typestyle'
 import calculateBinds from '../Utils/calculate_binds'
 import VisualKey from './VisualKey'
-import h337 from 'heatmap.js'
-
-// config
-const HEATMAP_FILLING = true
-const HEATMAP_FILLING_RATIO = 1
-const HEATMAP_FILLING_AVERAGE = false
+import { createHeatmap } from '../Utils'
+import { biggestOf, smallestOf, widthOf } from '../Utils/calc_utils'
 
 interface IKeyboardContainerProps {
   text: string,
@@ -39,64 +35,8 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
 
   // create heatmap
   useEffect(() => {
-    const heatmap = h337.create({
-      container: heatmap_ref.current!,
-      radius: 80,
-      // blur: 0,
-      maxOpacity: 0.5,
-      minOpacity: 0,
-    })
-
-
-    const data: {x: number, y: number, value: number}[] = []
-    keyboard.rows.forEach((row, row_index) => {
-      row.keys.forEach((key, key_index) => {
-        const key_sim = simulation.keys[key.id]
-        if (key_sim.presses > 0) {
-          data.push({...key.pos, value: key_sim.heat})
-
-          // fill horizontal gap between this key and the one before
-          if (HEATMAP_FILLING) {
-            const prev_key = row.keys[key_index - 1]
-            const prev_key_sim = simulation.keys[prev_key?.id]
-            if (prev_key_sim?.presses > 0) 
-              data.push({
-                x: prev_key.pos.x + (key.pos.x - prev_key.pos.x) / 2,
-                y: key.pos.y,
-                value: HEATMAP_FILLING_AVERAGE
-                  ? (key_sim.heat + prev_key_sim.heat) / 2 / HEATMAP_FILLING_RATIO
-                  : key_sim.heat > prev_key_sim.heat ? prev_key_sim.heat : key_sim.heat
-              })
-
-            const width = defaults.key_width * +(key.options.w ?? 1)
-            if (row_index > 0) {
-              for (let i = 0; i < keyboard.rows[row_index - 1].keys.length; i++) {
-                const key_above = keyboard.rows[row_index - 1].keys[i]
-                if (Math.abs(key.pos.x - key_above.pos.x) < width && simulation.keys[key_above.id].presses > 0) {console.log(key.chars[0], key_above.chars[0])
-                  data.push({
-                    x: (key.pos.x + key_above.pos.x) / 2,
-                    y: (key.pos.y + key_above.pos.y) / 2,
-                    value: HEATMAP_FILLING_AVERAGE
-                      ? (key_sim.heat + simulation.keys[i].heat) / 2 / HEATMAP_FILLING_RATIO
-                      : key_sim.heat > simulation.keys[key_above.id].heat ? simulation.keys[key_above.id].heat : key_sim.heat
-                  })
-                }
-              }
-            }
-          }
-        }
-      })
-    })
-
-    heatmap.setData({
-      max: 0.45,
-      min: 0,
-      data: data,
-    })
-
-    return () => { // cleanup
-      heatmap_ref.current?.removeChild(heatmap_ref.current?.firstChild!)
-    }
+    if (heatmap_on)
+      createHeatmap(keyboard, simulation, heatmap_ref.current!)
   })
 
   //#region Functions
@@ -111,25 +51,48 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
         id: lastOf(lastOf(keyboard.rows).keys).id + 1,
         chars: Array(5).fill(''),
         options: {},
-        pos: { x: 0, y: 0 }
+        pos: keyboard.rows[row_index].keys[key_index].pos
       })
 
     setKeyboard(calculateBinds(keyboard))
   }
 
-  const swapKeys = (pos_1: {x: number, y: number}, pos_2: {x: number, y: number}) => {
-    if (pos_2.x < 0 || pos_2.y < 0)
+  const swapKeys = (index_1: {row: number, col: number}, index_2: {row: number, col: number}) => {
+    if (index_2.row < 0 || index_2.col < 0)
       return
 
-    const key_1 = keyboard.rows[pos_1.x].keys[pos_1.y]
-    const key_2 = keyboard.rows[pos_2.x].keys[pos_2.y]
+    const key_1 = keyboard.rows[index_1.row].keys[index_1.col]
+    const key_2 = keyboard.rows[index_2.row].keys[index_2.col]
 
-    const old_pos = key_1.pos
-    key_1.pos = key_2.pos
-    key_2.pos = old_pos
+    keyboard.rows[index_2.row].keys.splice(index_2.col, 1, key_1)
+    keyboard.rows[index_1.row].keys.splice(index_1.col, 1, key_2)
 
-    keyboard.rows[pos_2.x].keys.splice(pos_2.y, 1, key_1)
-    keyboard.rows[pos_1.x].keys.splice(pos_1.y, 1, key_2)
+    // re-calculate positions of affected keys
+    if (key_1.options.w === key_2.options.w) {
+      const p = key_2.pos
+      key_2.pos = key_1.pos
+      key_1.pos = p
+    } else {
+      if (index_1.row === index_2.row) {
+        for (let i = smallestOf(index_1.col, index_2.col); i <= biggestOf(index_1.col, index_2.col); i++) {
+          const key = keyboard.rows[index_1.row].keys[i]
+          const prev_key = keyboard.rows[index_1.row].keys[i-1] ?? { pos: { x: 0 }, options: { w: 0 } }
+          key.pos.x = prev_key.pos.x + widthOf(prev_key) / 2 + widthOf(key) / 2
+        }
+      } else {
+        [index_1.row, index_2.row].forEach(row_index => {
+          keyboard.rows[row_index].keys.forEach((key, key_index) => {
+            const prev_key = keyboard.rows[row_index].keys[key_index-1] ?? { pos: { x: 0 }, options: { w: 0 } }
+            key.pos.x = prev_key.pos.x + widthOf(prev_key) / 2 + widthOf(key) / 2
+          })
+        })
+
+        const old_y = key_1.pos.y
+        key_1.pos.y = key_2.pos.y
+        key_2.pos.y = old_y
+      }
+    }
+
     setKeyboard(calculateBinds(keyboard))
   }
 
@@ -141,19 +104,19 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
 
     const row_index = Math.floor(relative.y / defaults.key_width)
     if (row_index >= keyboard.rows.length || row_index < 0)
-      return { x: -1, y: -1 }
+      return { row: -1, col: -1 }
 
     let key_index = -1
     let distance = 0
     keyboard.rows[row_index].keys.every((key => {
-      distance += defaults.key_width * (+key.options.w || 1)
+      distance += widthOf(key)
       key_index++
       return (distance < relative.x)
     }))
 
     return {
-      x: row_index,
-      y: key_index,
+      row: row_index,
+      col: key_index,
     }
   }
   //#endregion
@@ -187,7 +150,7 @@ const KeyboardContainer = (props: IKeyboardContainerProps) => {
                 key_data={simulation.keys[key.id]}
                 heat_enabled={!heatmap_on}
                 updateKey={(key: Key | null, add_key?: boolean) => {updateKey(row_index, key_index, key, add_key)}}
-                swapWithKey={(x, y) => swapKeys({x: row_index, y: key_index}, findIndexes(x, y))}
+                swapWithKey={(x, y) => swapKeys({row: row_index, col: key_index}, findIndexes(x, y))}
               />
             )}
           </div>

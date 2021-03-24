@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { HeaderBar, KeyboardContainer } from './Components'
 import { Keyboard } from './Models/Keyboard'
 import { stylesheet } from 'typestyle'

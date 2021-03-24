@@ -14,9 +14,9 @@ const Dropdown = (props: IDropdownProps) => {
   const [selection, setSelection] = useState(0)
 
   const fadeIn = (index: number) => ({
-    transition: `opacity ${(active ? (index + 1) : props.options.length - index) * transition_time / props.options.length}s`
+    transition: `opacity ${(active ? (index + 1) : props.options.length - index) * (defaults.transition_time * 3) / props.options.length}s`
      + `, background-color 0.2s`
-     + `, visibility ${transition_time}s`,
+     + `, visibility ${defaults.transition_time * 3}s`, 
     opacity: active ? 1 : 0,
     cursor: active ? 'pointer' : 'default', }
   )
@@ -44,8 +44,6 @@ const Dropdown = (props: IDropdownProps) => {
     </div>
   )
 }
-
-const transition_time: number = 0.75
 
 const css = stylesheet({
   dropdown_container: {

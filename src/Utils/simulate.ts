@@ -8,7 +8,7 @@ const simulate = (keyboard: Keyboard, text: string): Simulation => {
 
   for (let row of keyboard.rows)
     for (let key of row.keys)
-      simulation.keys.push(EmptyKeyData())
+      simulation.keys[key.id] = EmptyKeyData()
 
   // count the amount of each character and the total
   let caps_lock: boolean = false
@@ -58,10 +58,10 @@ const simulate = (keyboard: Keyboard, text: string): Simulation => {
   })
 
   // calculate data for each key
-  for (let key of simulation.keys) {
+  simulation.keys.forEach(key => {
     key.heat = key.presses / simulation.max_presses
     key.percentage = Math.round(key.presses / simulation.total_presses * 100)
-  }
+  })
 
   return simulation
 }

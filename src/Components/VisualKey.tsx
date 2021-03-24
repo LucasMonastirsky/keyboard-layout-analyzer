@@ -7,6 +7,7 @@ import KeyEditMenu from './KeyEditMenu'
 import KeyTooltip from './KeyTooltip'
 import Draggable from 'react-draggable'
 import { KeyData } from '../Models/Simulation'
+import { widthOf } from '../Utils/calc_utils'
 
 interface IVisualKeyProps {
   key_obj: Key,
@@ -33,17 +34,19 @@ const VisualKey = (props: IVisualKeyProps) => {
   const ref = useRef<HTMLDivElement>(null)
 
   //#region Functions
-  const onMouseDown = () => {
-    setClickTimestamp(editting ? 0 : Date.now())
-  }
+  const click_events = {
+    onMouseDown: () => {
+      setClickTimestamp(editting ? 0 : Date.now())
+    },
 
-  const onMouseUp = () => {
-    if (editting || is_dragging || Date.now() - click_timestamp > 300)
-      return
-    else {
-      setEditting(true)
-      setTooltipActive(false)
-    }
+    onMouseUp: () => {
+      if (editting || is_dragging || Date.now() - click_timestamp > 300)
+        return
+      else {
+        setEditting(true)
+        setTooltipActive(false)
+      }
+    },
   }
 
   const drag_events = {
@@ -85,7 +88,6 @@ const VisualKey = (props: IVisualKeyProps) => {
     }, 500)
   }
   //#endregion
-
   const key_style = {
     backgroundColor: (props.heat_enabled ?? true)
       ? heatToColor(props.key_data.heat)
@@ -94,10 +96,9 @@ const VisualKey = (props: IVisualKeyProps) => {
   }
 
   return (
-      <div ref={ref} className={css.key_slot} style={{
-          width: (+props.key_obj.options.w || 1) * defaults.key_width,
-          marginLeft: (+props.key_obj.options.x || 0) * defaults.key_width, }}
-          {...{onMouseUp, onMouseDown}}>
+      <div ref={ref} className={css.key_slot} {...click_events} style={{
+        width: widthOf(props.key_obj),
+        marginLeft: +(props.key_obj.options.x ?? 0) * defaults.key_width, }}>
         <Draggable bounds={is_dragging ? false : {top: 0, right: 0, left: 0, bottom: 0}} position={{x:0, y: 0}} {...drag_events}>
           <div className={css.key} style={key_style} {...hover_events}>
             <div className={css.key_cell_top}>
@@ -149,6 +150,7 @@ const css = stylesheet({
     padding: '5px',
     margin: '0.5px',
     cursor: 'pointer',
+    transition: `background-color ${defaults.transition_time}s`
   },
   key_text: {
       margin: 'auto',
