@@ -1,8 +1,8 @@
 import { Keyboard, Row, Key } from '../Models/Keyboard'
-import validateChar, { modifiers } from './validate_char'
+import validateChar, { modifiers } from '../Utils/validate_char'
 import calculateBinds from './calculate_binds'
 import { defaults } from '../Styling'
-import { widthOf } from './calc_utils'
+import { widthOf } from '../Utils/calc_utils'
 
 const readLayout = (layout: string, name?: string): Keyboard => {
   const keyboard: Keyboard = {

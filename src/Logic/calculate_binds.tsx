@@ -1,5 +1,5 @@
 import { Keyboard } from "../Models/Keyboard"
-import { modifiers } from './validate_char'
+import { modifiers } from '../Utils/validate_char'
 
 const calculateBinds = (keyboard: Keyboard) => {
   keyboard.binds = {}

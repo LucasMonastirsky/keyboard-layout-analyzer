@@ -1,6 +1,6 @@
 import { Keyboard } from '../Models/Keyboard'
 import { EmptyKeyData, KeyData, Simulation } from '../Models/Simulation'
-import replace_special_chars from './replace_special_chars'
+import replace_special_chars from '../Utils/replace_special_chars'
 
 const simulate = (keyboard: Keyboard, text: string): Simulation => {
   const simulation: Simulation = { keys: [], total_presses: 0, max_presses: 0 }

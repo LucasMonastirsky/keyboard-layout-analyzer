@@ -1,13 +1,13 @@
-import simulate from '../Utils/simulate'
+import simulate from '../Logic/simulate'
 import { useEffect, useRef, useState } from 'react'
 import { default_layouts } from '../Configs'
 import { Dropdown } from '../Components'
 import { colors, defaults } from '../Styling'
 import { Key, Keyboard } from '../Models/Keyboard'
 import { stylesheet } from 'typestyle'
-import calculateBinds from '../Utils/calculate_binds'
+import calculateBinds from '../Logic/calculate_binds'
 import VisualKey from './VisualKey'
-import { createHeatmap } from '../Utils'
+import createHeatmap from '../Logic/create_heatmap'
 import { biggestOf, smallestOf, widthOf } from '../Utils/calc_utils'
 
 interface IKeyboardContainerProps {

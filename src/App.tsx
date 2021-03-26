@@ -5,6 +5,8 @@ import { stylesheet } from 'typestyle'
 import { default_layouts } from './Configs'
 import MultiMenu from './Components/MultiMenu'
 import MenuSimulation from './Components/MenuSimulation'
+import './Utils/filter_console'
+import { defaults } from './Styling'
 
 function App() {
   const [simulation_text, setSimulationText] = useState("")
@@ -66,10 +68,14 @@ const css = stylesheet({
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
+    overflow: 'hidden',
   },
   content: {
     marginLeft: 'auto',
     marginRight: 'auto',
+    overflow: 'auto',
+    width: '100%',
+    paddingBottom: defaults.margin * 2,
   }
 })
 

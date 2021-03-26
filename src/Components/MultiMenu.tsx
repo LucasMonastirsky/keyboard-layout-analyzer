@@ -9,7 +9,7 @@ const MultiMenu = (props: {menus: { title: string, content: any }[]}) => {
   const toggleActive = () => setActive(!active)
 
   return (
-    <div className={css.container} style={{ position: active ? 'fixed' : 'unset' }}>
+    <div className={css.container} style={{ position: active ? 'inherit' : 'unset' }}>
       <div className={css.content + (active ? '' : ' hidden')}>
         <div className={css.header}>
           {props.menus.map((menu, menu_index) =>
@@ -22,7 +22,7 @@ const MultiMenu = (props: {menus: { title: string, content: any }[]}) => {
           )}
           <i onClick={toggleActive} className={css.close_icon + ` fa fa-chevron-${active ? 'down' : 'up'}`} />
         </div>
-        <div className={css.menu_container}>
+        <div className={css.menu_container} style={{display: active ? 'inherit' : 'none'}}>
           <div className={css.menu}>{props.menus[index].content}</div>
         </div>
       </div>

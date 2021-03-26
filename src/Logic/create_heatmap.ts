@@ -1,7 +1,7 @@
 import { Keyboard } from '../Models/Keyboard'
 import { Simulation } from '../Models/Simulation'
 import h337 from 'heatmap.js'
-import { average, smallestOf, widthOf } from './calc_utils'
+import { average, smallestOf, widthOf } from '../Utils/calc_utils'
 
 // config
 const HEATMAP_FILLING = true

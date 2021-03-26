@@ -1,5 +1,5 @@
 import { Keyboard } from '../Models/Keyboard'
-import readLayout from '../Utils/read_layout'
+import readLayout from '../Logic/read_layout'
 
 const default_layouts: Keyboard[] = [
   readLayout(

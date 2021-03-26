@@ -6,7 +6,7 @@ const HeaderBar = () => {
   return (
   <div className={css.header_bar}>
     <div className={css.title}>Keyboard Layout Analyzer</div>
-    <div className={css.version}>version 0.7</div>
+    <div className={css.version}>version 0.7.2</div>
     <a className={css.github_container} href="https://github.com/LucasMonastirsky/keyboard-layout-analyzer">
       <img src={icon_github} className={css.icon} alt="GitHub Link" />
       <div className={css.text}>Source Code</div>
