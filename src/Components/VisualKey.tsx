@@ -23,7 +23,7 @@ const VisualKey = (props: IVisualKeyProps) => {
   const [is_dragging, setDragging] = useState(false)
   const [click_timestamp, setClickTimestamp] = useState(0)
   const [tooltip_active, setTooltipActive] = useState(false)
-  const [tooltip_pos, setTooltipPos] = useState({x: 0, y: 0})
+  const [mouse_pos, setMousePos] = useState({x: 0, y: 0})
   const [hovering, setHovering] = useState(false)
   
   const hovering_ref = useRef(hovering)
@@ -75,7 +75,8 @@ const VisualKey = (props: IVisualKeyProps) => {
       setTooltipActive(false)
     },
     onMouseMove: (e: any ) => {
-      setTooltipPos({x: e.clientX + 15, y: e.clientY + 5})
+      if (!editting)
+        setMousePos({x: e.clientX + 15, y: e.clientY + 5})
       setTooltipActive(false)
       delayTooltip()
     }
@@ -119,10 +120,11 @@ const VisualKey = (props: IVisualKeyProps) => {
         </Draggable>
         {editting && <KeyEditMenu
           key_obj={props.key_obj}
+          mouse_pos={mouse_pos}
           updateKey={props.updateKey}
           onClickOutside={() => setEditting(false)}
         />}
-        <KeyTooltip active={tooltip_active} pos={tooltip_pos} data={props.key_data} />
+        <KeyTooltip active={tooltip_active} pos={mouse_pos} data={props.key_data} />
       </div>
   )
 }

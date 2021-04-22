@@ -3,7 +3,13 @@ import { stylesheet } from 'typestyle'
 import { Key } from '../Models/Keyboard'
 import { colors, defaults } from '../Styling'
 
-const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?: boolean) => void, onClickOutside: ()=>void}) => {
+type PropsType = {
+  key_obj: Key,
+  mouse_pos: { x: number, y: number }
+  updateKey: (key: Key | null, add_key?: boolean) => void,
+  onClickOutside: ()=>void
+}
+const KeyEditMenu = (props: PropsType) => {
   const [key, setKey] = useState(props.key_obj)
   const menu_ref = useRef<HTMLDivElement>(null)
 
@@ -42,7 +48,7 @@ const KeyEditMenu = (props: {key_obj: Key, updateKey: (key: Key | null, add_key?
   //#endregion
 
   return (
-    <div className={css.edit_menu} ref={menu_ref}>
+    <div className={css.edit_menu} ref={menu_ref} style={{top: props.mouse_pos.y, left: props.mouse_pos.x}}>
       {['KEY', 'SHIFT', 'CTRL', 'ALT', 'FN', 'FN2'].map((x, i) => 
         <Input title={x} content={key.chars[i]} onChange={key => changeChar(i, key)} type="key" />
       )}
@@ -123,8 +129,7 @@ const css = stylesheet({
     backgroundColor: colors.dark + defaults.transparency,
     color: colors.light,
     borderRadius: 2,
-    position: 'absolute',
-    top: defaults.key_width,
+    position: 'fixed',
     marginTop: defaults.margin / 2,
     padding: defaults.margin / 3,
     width: 'max-content',
